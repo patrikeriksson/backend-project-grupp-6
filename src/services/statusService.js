@@ -3,7 +3,6 @@ import { orderDb } from "../config/db.js";
 //Hämta orderinfo om specifik order
 async function getOrderById(req, res) {
   try {
-   
     const orderId = req.params.orderId;
 
     const order = await orderDb.findOne({ _id: orderId });
@@ -29,9 +28,7 @@ async function getOrderById(req, res) {
 
     res.status(200).json({ orderWithDeliveryStatus });
   } catch (error) {
-
-    res.status(400).json({ error: 'Failed to get users orders' });
-
+    res.status(400).json({ error: "Failed to get users orders" });
   }
 }
 
