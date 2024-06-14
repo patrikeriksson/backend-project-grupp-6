@@ -1,8 +1,6 @@
-
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { userDb } from '../config/db.js'; // Anta att du har en userDb för användardata
-
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { userDb } from "../config/db.js";
 
 // Funktion för att registrera en ny användare
 async function registerUser(req, res) {
@@ -12,19 +10,20 @@ async function registerUser(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = { username, password: hashedPassword };
 
-    
+    const existingUser = await userDb.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
     const newUser = await userDb.insert(user);
-  
+
     res.status(201).json(newUser);
   } catch (error) {
-   
     res.status(400).json({ error: "Failed to register user" });
   }
 }
 
-
-const SECRET_KEY = 'your-secret-key'; 
-
+const SECRET_KEY = "your-secret-key";
 
 async function loginUser(req, res) {
   const { username, password } = req.body;
@@ -35,24 +34,22 @@ async function loginUser(req, res) {
       .json({ error: "Username and password are required" });
   }
 
-
   try {
     const user = await userDb.findOne({ username });
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
-      return res.status(400).json({ error: 'Invalid username or password' });
+      return res.status(400).json({ error: "Invalid username or password" });
     }
 
     const token = jwt.sign(
       { id: user._id, username: user.username },
       SECRET_KEY,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to login user' });
-
+    res.status(500).json({ error: "Failed to login user" });
   }
 }
 
